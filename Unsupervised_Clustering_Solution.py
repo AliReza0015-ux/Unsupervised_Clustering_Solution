@@ -63,9 +63,13 @@ wcss = []
 for i in k_range:
     kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Annual_Income', 'Spending_Score']])
     wcss.append(kmodel_i.inertia_)
+    st.write("DataFrame columns:", wss_df.columns)
+    
+st.write(wss_df.head())
+
 
 wss_df = pd.DataFrame({'Clusters': list(k_range), 'WCSS': wcss})
-st.line_chart(wss_df.rename(columns={'Clusters':'index'}).set_index('Clusters'))
+st.line_chart(wss_df.rename(columns={'Clusters':'index'}).set_index('clusters'))
 
 # Silhouette Score
 st.header("Silhouette Score for various k")
