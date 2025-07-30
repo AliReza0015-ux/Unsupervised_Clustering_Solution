@@ -89,7 +89,7 @@ for i in k_range:
     sil_scores.append(silhouette_score(df[['Annual_Income', 'Spending_Score']], labels))
 
 sil_df = pd.DataFrame({'Clusters': list(k_range), 'Silhouette_Score': sil_scores})
-st.line_chart(sil_df.set_index('Cluster'))  
+st.line_chart(sil_df.set_index('Clusters'))  
 
 st.markdown("""
 **Conclusion:**  
