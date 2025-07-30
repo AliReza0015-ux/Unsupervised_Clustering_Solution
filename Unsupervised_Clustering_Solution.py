@@ -56,7 +56,7 @@ warnings.filterwarnings("ignore")
 # ### Reading the data
 
 # %%
-df = pd.read_csv(r'C:\Users\mohsa\Downloads\mall_customers.csv')
+df = pd.read_csv('mall_customers.csv')
 df.head()
 
 # %%
