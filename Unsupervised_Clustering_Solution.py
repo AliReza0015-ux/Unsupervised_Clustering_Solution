@@ -1,287 +1,115 @@
-# %% [markdown]
-# # Clustering Agorithms
-
-# %% [markdown]
-# ## **Mall Customer Segmentation Model**
-
-# %% [markdown]
-# ## Project Scope:
-# 
-# Malls are often indulged in the race to increase their customers and making sales. To achieve this task machine learning is being applied by many malls already.
-# 
-# It is amazing to realize the fact that how machine learning can aid in such ambitions. The shopping malls make use of their customers’ data and develop ML models to target the right audience for right product marketing.
-# 
-# 
-# **Your role:** Mall Customer data is an interesting dataset that has hypothetical customer data. It puts you in the shoes of the owner of a supermarket. You have customer data, and on this basis of the data, you have to divide the customers into various groups.
-# 
-# **Goal:** Build an unsupervised clustering model to segment customers into correct groups.
-# 
-# **Specifics:**
-# 
-# * Machine Learning task: Clustering model
-# * Target variable: N/A
-# * Input variables: Refer to data dictionary below
-# * Success Criteria: Cannot be validated beforehand
-# 
-
-# %% [markdown]
-# ## Data Dictionary:
-# 
-# * **CustomerID:** Unique ID assigned to the customer
-# * **Gender:** Gender of the customer
-# * **Age:** Age of the customer
-# * **Income:** Annual Income of the customers in 1000 dollars
-# * **Spending_Score:** Score assigned between 1-100 by the mall based on customer' spending behavior
-
-# %% [markdown]
-# ## **Data Analysis and Data Prep**
-
-# %% [markdown]
-# ### Loading all the necessary packages
-
-# %%
 import streamlit as st
-
-st.title("Clustering_Solution")
-
-# %%
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import warnings
-warnings.filterwarnings("ignore")
-
-# %% [markdown]
-# ### Reading the data
-
-# %%
-df = pd.read_csv('mall_customers.csv')
-df.head()
-
-# %%
-df.shape
-
-# %%
-# Check some quick stats of the data
-df.describe()
-
-# %%
-df.corr(numeric_only=True)
-
-# %%
-df.corr(numeric_only=True, method='spearman' )
-
-# %%
-# let's plot a pairplot
-sns.pairplot(df[['Age','Annual_Income','Spending_Score']])
-plt.show()
-
-# %% [markdown]
-# * As a mall owner you are interested in the customer spending score. If you look at spending vs Age, you can observe that the spending score is high for customers between age 20-40, and relatively low for customers beyond 40.
-# <br><br>
-# * Remember, K-means clustering is sensitive to outliers. So, if you see any guilty outliers you should consider removing them.
-
-# %%
-# import kmeans model
 from sklearn.cluster import KMeans
-
-# %% [markdown]
-# #### We will build a model with only 2 features for now to visualise it, and later we will add more feature' and use the evaluation metric silhouette measure.
-
-# %%
-# Let' train our model on spending_score and annual_income
-kmodel = KMeans(n_clusters=5).fit(df[['Annual_Income','Spending_Score']])
-
-# %%
-# check your cluster centers
-kmodel.cluster_centers_
-
-# %%
-# Check the cluster labels
-kmodel.labels_
-
-# %%
-# Put this data back in to the main dataframe corresponding to each observation
-df['Cluster'] = kmodel.labels_
-
-# %%
-# check the dataset
-df.head()
-
-# %%
-# check how many observations belong to each cluster
-df['Cluster'].value_counts()
-
-# %%
-# Let' visualize these clusters
-sns.scatterplot(x='Annual_Income', y = 'Spending_Score', data=df, hue='Cluster', palette='colorblind')
-plt.show()
-
-# %% [markdown]
-# #### Visually we are able to see 5 clear clusters. Let's verify them using the Elbow and Silhouette Method
-
-# %% [markdown]
-#     
-
-# %% [markdown]
-# ## 1. Elbow Method
-
-# %% [markdown]
-# * We will analyze clusters from 3 to 8 and calculate the WCSS scores. The WCSS scores can be used to plot the Elbow Plot.
-# 
-# * WCSS = Within Cluster Sum of Squares
-
-# %%
-# try using a for loop
-k = range(3,9)
-K = []
-WCSS = []
-for i in k:
-    kmodel = KMeans(n_clusters=i).fit(df[['Annual_Income','Spending_Score']])
-    wcss_score = kmodel.inertia_
-    WCSS.append(wcss_score)
-    K.append(i)
-
-# %%
-K, WCSS
-
-# %%
-# Store the number of clusters and their respective WSS scores in a dataframe
-wss = pd.DataFrame({'cluster': K, 'WCSS_Score':WCSS})
-wss
-
-# %%
-# Now, plot a Elbow plot
-wss.plot(x='cluster', y = 'WCSS_Score')
-plt.xlabel('No. of clusters')
-plt.ylabel('WSS Score')
-plt.title('Elbow Plot')
-plt.show()
-
-# %% [markdown]
-# We get 5 clusters as a best value of k using the WSS method.
-
-# %% [markdown]
-#     
-
-# %% [markdown]
-# ## 2. Silhouette Measure
-# 
-# Check the value of K using the Silhouette Measure
-
-# %%
-# import silhouette_score
 from sklearn.metrics import silhouette_score
 
-# %%
-# same as above, calculate sihouetter score for each cluster using a for loop
+warnings.filterwarnings("ignore")
 
-# try using a for loop
-k = range(3,9) # to loop from 3 to 8
-K = []         # to store the values of k
-ss = []        # to store respective silhouetter scores
-for i in k:
-    kmodel = KMeans(n_clusters=i,).fit(df[['Annual_Income','Spending_Score']], )
-    ypred = kmodel.labels_
-    sil_score = silhouette_score(df[['Annual_Income','Spending_Score']], ypred)
-    K.append(i)
-    ss.append(sil_score)
+# Page title
+st.title("Mall Customer Segmentation Model - Clustering Solution")
 
-# %%
-ss
+# Load data
+df = pd.read_csv('mall_customers.csv')
 
-# %%
-# Store the number of clusters and their respective silhouette scores in a dataframe
-wss['Silhouette_Score']=ss
+st.header("Dataset Overview")
+st.dataframe(df.head())
+st.write(f"Dataset shape: {df.shape}")
 
-# %%
-wss
+st.header("Statistical Summary")
+st.dataframe(df.describe())
 
-# %% [markdown]
-# ### Silhouette score is between -1 to +1
-# 
-# closer to +1 means the clusters are better
+st.header("Correlation Matrix (Pearson)")
+corr_pearson = df.corr(numeric_only=True)
+st.dataframe(corr_pearson)
 
-# %%
-# Now, plot the silhouette plot
-wss.plot(x='cluster', y='Silhouette_Score')
-plt.xlabel('No. of clusters')
-plt.ylabel('Silhouette Score')
-plt.title('Silhouette Plot')
-plt.show()
+st.header("Correlation Matrix (Spearman)")
+corr_spearman = df.corr(numeric_only=True, method='spearman')
+st.dataframe(corr_spearman)
 
-# %% [markdown]
-#     
+st.header("Pairplot of Age, Annual Income and Spending Score")
+fig1 = sns.pairplot(df[['Age', 'Annual_Income', 'Spending_Score']])
+st.pyplot(fig1)
 
-# %% [markdown]
-# #### Conclusion: Both Elbow and Silhouette methods gave the optimal value of k=5
+st.markdown("""
+**Observations:**  
+- Spending Score is high for customers between age 20-40.  
+- K-means is sensitive to outliers, consider removing if needed.
+""")
 
-# %% [markdown]
-#     
+# Clustering with 2 features
+st.header("K-Means Clustering on Annual Income and Spending Score")
+kmodel = KMeans(n_clusters=5, random_state=42).fit(df[['Annual_Income', 'Spending_Score']])
+df['Cluster'] = kmodel.labels_
 
-# %% [markdown]
-# ## Now use all the available features and use the k-means model.
-# 
-# * Remember, now you cannot visualise the clusters with more than 2 features.
-# * So, the optimal number of clusters can be only determined by Elbow and Silhouette methods.
+st.subheader("Cluster Centers")
+st.write(pd.DataFrame(kmodel.cluster_centers_, columns=['Annual_Income', 'Spending_Score']))
 
-# %%
-# Train a model on 'Age','Annual_Income','Spending_Score' features
-k = range(3,9)
-K = []
-ss = []
-for i in k:
-    kmodel = KMeans(n_clusters=i).fit(df[['Age','Annual_Income','Spending_Score']], )
-    ypred = kmodel.labels_
-    sil_score = silhouette_score(df[['Age','Annual_Income','Spending_Score']], ypred)
-    K.append(i)
-    ss.append(sil_score)
+st.subheader("Cluster Counts")
+st.write(df['Cluster'].value_counts())
 
-# %%
-# Store the number of clusters and their respective silhouette scores in a dataframe
-Variables3 = pd.DataFrame({'cluster': K, 'Silhouette_Score':ss})
-Variables3
+st.subheader("Cluster Visualization")
+fig2, ax2 = plt.subplots()
+sns.scatterplot(x='Annual_Income', y='Spending_Score', data=df, hue='Cluster', palette='colorblind', ax=ax2)
+st.pyplot(fig2)
 
-# %%
-# Now, plot the silhouette plot
-Variables3.plot(x='cluster', y='Silhouette_Score')
+# Elbow Method
+st.header("Elbow Method to find optimal k")
+k_range = range(3, 9)
+wcss = []
+for i in k_range:
+    kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Annual_Income', 'Spending_Score']])
+    wcss.append(kmodel_i.inertia_)
 
-# %% [markdown]
-#     
+wss_df = pd.DataFrame({'Clusters': list(k_range), 'WCSS': wcss})
+st.line_chart(wss_df.rename(columns={'Clusters':'index'}).set_index('Clusters'))
 
-# %%
-# try using a for loop
-k = range(3,9)
-K = []
-WCSS = []
-for i in k:
-    kmodel = KMeans(n_clusters=i).fit(df[['Annual_Income','Spending_Score','Age']])
-    wcss_score = kmodel.inertia_
-    WCSS.append(wcss_score)
-    K.append(i)
+# Silhouette Score
+st.header("Silhouette Score for various k")
+sil_scores = []
+for i in k_range:
+    kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Annual_Income', 'Spending_Score']])
+    labels = kmodel_i.labels_
+    sil_scores.append(silhouette_score(df[['Annual_Income', 'Spending_Score']], labels))
 
-# %%
-# Store the number of clusters and their respective WSS scores in a dataframe
-wss = pd.DataFrame({'cluster': K, 'WCSS_Score':WCSS})
-wss
+sil_df = pd.DataFrame({'Clusters': list(k_range), 'Silhouette_Score': sil_scores})
+st.line_chart(sil_df.rename(columns={'Clusters':'index'}).set_index('Clusters'))
 
-# %%
-# Now, plot a Elbow plot
-wss.plot(x='cluster', y = 'WCSS_Score')
-plt.xlabel('No. of clusters')
-plt.ylabel('WSS Score')
-plt.title('Elbow Plot')
-plt.show()
+st.markdown("""
+**Conclusion:**  
+Both Elbow and Silhouette methods suggest optimal clusters around k=5.
+""")
 
-# %% [markdown]
-# #### Conclusion: With 3 features we now have the optimal value of k=6
+# Using all 3 features now
+st.header("K-Means Clustering with Age, Annual Income and Spending Score")
 
-# %% [markdown]
-# ### Exercise:
-# 
-# Use argument `init=kmeans++` as a hyperparameter while training the model.
-# 
-# KMEANS++ internally analyzes the patterns of the data. Such as the shape of data (whether it is spherical, rectangle, oval etc.) and then initializes the centroids. Thus, assigning the clusters in a smart way.
+sil_scores_3f = []
+for i in k_range:
+    kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Age', 'Annual_Income', 'Spending_Score']])
+    labels = kmodel_i.labels_
+    sil_scores_3f.append(silhouette_score(df[['Age', 'Annual_Income', 'Spending_Score']], labels))
 
+sil_3f_df = pd.DataFrame({'Clusters': list(k_range), 'Silhouette_Score': sil_scores_3f})
+st.line_chart(sil_3f_df.rename(columns={'Clusters':'index'}).set_index('Clusters'))
 
+# Elbow for 3 features
+wcss_3f = []
+for i in k_range:
+    kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Annual_Income', 'Spending_Score', 'Age']])
+    wcss_3f.append(kmodel_i.inertia_)
+
+wss_3f_df = pd.DataFrame({'Clusters': list(k_range), 'WCSS': wcss_3f})
+st.line_chart(wss_3f_df.rename(columns={'Clusters':'index'}).set_index('Clusters'))
+
+st.markdown("""
+**Conclusion:**  
+With 3 features, the optimal number of clusters looks closer to k=6.
+""")
+
+st.markdown("""
+### Exercise:  
+Try training KMeans with `init='k-means++'` parameter to improve centroid initialization.
+""")
