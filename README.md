@@ -53,4 +53,7 @@ ________________________________________
 Author
 Ali Reza Mohseni
 https://github.com/AliReza0015-ux
+##  Live Demo
+[Click to view the deployed app](https://unsupervisedclusteringsolution-f2i9mriduanzmgcnbhjzdd.streamlit.app/)
+
 
