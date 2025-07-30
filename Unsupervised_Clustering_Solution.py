@@ -57,19 +57,28 @@ sns.scatterplot(x='Annual_Income', y='Spending_Score', data=df, hue='Cluster', p
 st.pyplot(fig2)
 
 # Elbow Method
-st.header("Elbow Method to find optimal k")
+st.header("Elbow Method to Find Optimal k")
+
+# Step 1: Define k range
 k_range = range(3, 9)
 wcss = []
+
+# Step 2: Loop to collect inertia values
 for i in k_range:
-    kmodel_i = KMeans(n_clusters=i, random_state=42).fit(df[['Annual_Income', 'Spending_Score']])
+    kmodel_i = KMeans(n_clusters=i, random_state=42)
+    kmodel_i.fit(df[['Annual_Income', 'Spending_Score']])
     wcss.append(kmodel_i.inertia_)
-    st.write("DataFrame columns:", wss_df.columns)
-    
+
+# Step 3: Create DataFrame from results
+wss_df = pd.DataFrame({'Clusters': list(k_range), 'WCSS': wcss})
+
+# Step 4: Debug and display
+st.write("DataFrame columns:", wss_df.columns)
 st.write(wss_df.head())
 
+# Step 5: Show line chart
+st.line_chart(wss_df.set_index('Clusters'))
 
-wss_df = pd.DataFrame({'Clusters': list(k_range), 'WCSS': wcss})
-st.line_chart(wss_df.rename(columns={'Clusters':'index'}).set_index('clusters'))
 
 # Silhouette Score
 st.header("Silhouette Score for various k")
